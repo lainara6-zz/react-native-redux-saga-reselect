@@ -1,44 +1,106 @@
 import React, { Component } from 'react'
-import { Text, View, Button } from 'react-native'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { createSelector } from 'reselect'
 import { fetchUser, filterUserByGender } from '../../redux/actions'
+import { FlatList } from 'react-native'
+import {
+	Container,
+	Header,
+	Left,
+	Body,
+	Right,
+	Button,
+	Segment,
+	Content,
+	Text,
+	List,
+	ListItem,
+	Thumbnail
+} from 'native-base'
 
 class Home extends Component {
+
+	constructor(props) {
+		super(props)
+		this.state = {
+			segmentIndex: 0
+		}
+	}
 
 	componentDidMount() {
 		this.initialFetchPeople()
 	}
 
 	render() {
-		let styles = {
-			container: {
-				flex: 1,
-				backgroundColor: "white",
-				justifyContent: "center",
-				alignItems: "center"
-			}
-		}
 
 		console.log('UI is redering...!')
 
 		return (
-			<View style={styles.container}>
-				<Button title='All' style={{ marginTop: 30 }} onPress={() => { this.filterUserByGender('all') }}></Button>
-				<Button title='Male' style={{ marginTop: 30 }} onPress={() => { this.filterUserByGender('male') }}></Button>
-				<Button title='Female' style={{ marginTop: 30 }} onPress={() => { this.filterUserByGender('female') }}></Button>
-				<Text style={{ marginTop: 30 }}>Count {this.props.list.length}</Text>
-			</View>
+			<Container>
+				<Header hasSegment>
+					<Body>
+						<Segment style={{ width: 240 }}>
+							<Button
+								style={{
+									width: 80,
+									justifyContent: 'center'
+								}}
+								onPress={() => this.segmentIndexChanged(0, 'all')}
+								active={this.state.segmentIndex === 0} first>
+								<Text>All</Text>
+							</Button>
+							<Button
+								style={{
+									width: 80,
+									justifyContent: 'center'
+								}}
+								onPress={() => this.segmentIndexChanged(1, 'male')}
+								active={this.state.segmentIndex === 1}>
+								<Text>Male</Text>
+							</Button>
+							<Button
+								style={{
+									width: 80,
+									justifyContent: 'center'
+								}}
+								onPress={() => this.segmentIndexChanged(2, 'female')}
+								active={this.state.segmentIndex === 2} last>
+								<Text>Female</Text>
+							</Button>
+						</Segment>
+					</Body>
+				</Header>
+				<Content>
+					<List>
+						<FlatList
+							data={this.props.list}
+							renderItem={({ item }) => {
+								return (
+									<ListItem avatar noIndent noBorder>
+										<Left>
+											<Thumbnail source={{ uri: item.picture.thumbnail }} />
+										</Left>
+										<Body>
+											<Text>{item.name.first + ' ' + item.name.last}</Text>
+											<Text note>{item.phone}</Text>
+										</Body>
+									</ListItem>
+							)}} 
+							keyExtractor={(_, index) => index.toString() }/>
+					</List>
+				</Content>
+			</Container>
 		)
 	}
 
-	initialFetchPeople = () => {
-		this.props.fetchUser(1, 5)
+	segmentIndexChanged = (index, gender) => {
+		this.setState({ segmentIndex: index })
+		this.props.filterUserByGender(gender)
 	}
 
-	filterUserByGender = gender => {
-		this.props.filterUserByGender(gender)
+	initialFetchPeople = () => {
+		this.props.fetchUser(1, 10)
 	}
 }
 
